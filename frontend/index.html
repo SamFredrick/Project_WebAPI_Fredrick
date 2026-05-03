@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Personal Contact Manager</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; color: #2d3748; }
+
+    header {
+      background: linear-gradient(135deg, #1a365d, #2b6cb0);
+      color: white;
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    header h1 { font-size: 1.6rem; font-weight: 700; }
+    header span { font-size: 2rem; }
+
+    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.65rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: white;
+      transition: border-color 0.2s;
+    }
+    .search-box:focus { outline: none; border-color: #2b6cb0; }
+    select.filter-select {
+      padding: 0.65rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: white;
+      cursor: pointer;
+    }
+    .btn {
+      padding: 0.65rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #2b6cb0; color: white; }
+    .btn-primary:hover { background: #1a365d; }
+    .btn-success { background: #276749; color: white; }
+    .btn-success:hover { background: #1c4532; }
+    .btn-danger { background: #c53030; color: white; font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+    .btn-danger:hover { background: #9b2c2c; }
+    .btn-edit { background: #d69e2e; color: white; font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+    .btn-edit:hover { background: #b7791f; }
+
+    .main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+    }
+    .card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: #1a365d; }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-bottom: 0.3rem; }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #2b6cb0; }
+
+    .form-actions { display: flex; gap: 0.7rem; margin-top: 1.2rem; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-personal { background: #bee3f8; color: #1a365d; }
+    .badge-professional { background: #c6f6d5; color: #1c4532; }
+
+    .contact-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .contact-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .contact-card:hover { border-color: #2b6cb0; box-shadow: 0 2px 8px rgba(43,108,176,0.1); }
+    .contact-info { flex: 1; }
+    .contact-name { font-weight: 700; font-size: 1rem; margin-bottom: 0.2rem; }
+    .contact-details { font-size: 0.85rem; color: #718096; display: flex; gap: 1rem; margin-top: 0.3rem; flex-wrap: wrap; }
+    .contact-actions { display: flex; gap: 0.5rem; }
+
+    .empty-state { text-align: center; padding: 3rem; color: #a0aec0; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 0.8rem 1.4rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      z-index: 999;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .toast.success { background: #276749; }
+    .toast.error { background: #c53030; }
+    .toast.show { display: block; animation: fadeIn 0.3s; }
+
+    .stats {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-box {
+      background: white;
+      border-radius: 10px;
+      padding: 0.8rem 1.2rem;
+      flex: 1;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .stat-number { font-size: 1.6rem; font-weight: 800; color: #2b6cb0; }
+    .stat-label { font-size: 0.78rem; color: #718096; font-weight: 600; text-transform: uppercase; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span>📇</span>
+  <h1>Personal Contact Manager</h1>
+</header>
+
+<div class="container">
+  <!-- Stats Row -->
+  <div class="stats">
+    <div class="stat-box">
+      <div class="stat-number" id="statTotal">0</div>
+      <div class="stat-label">Total Contacts</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number" id="statPersonal">0</div>
+      <div class="stat-label">Personal</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number" id="statProfessional">0</div>
+      <div class="stat-label">Professional</div>
+    </div>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="controls">
+    <input class="search-box" type="text" id="searchInput" placeholder="🔍 Search by name, email, or phone..." oninput="debounceSearch()" />
+    <select class="filter-select" id="typeFilter" onchange="loadContacts()">
+      <option value="">All Types</option>
+      <option value="Personal">Personal</option>
+      <option value="Professional">Professional</option>
+    </select>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+    <!-- Form Panel -->
+    <div class="card">
+      <h2 id="formTitle">➕ Add New Contact</h2>
+      <input type="hidden" id="editId" />
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="name" placeholder="e.g. Jane Smith" />
+      </div>
+      <div class="form-group">
+        <label>Email Address *</label>
+        <input type="email" id="email" placeholder="e.g. jane@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Phone Number *</label>
+        <input type="tel" id="phone" placeholder="e.g. (303) 555-0123" />
+      </div>
+      <div class="form-group">
+        <label>Contact Type *</label>
+        <select id="type">
+          <option value="Personal">Personal</option>
+          <option value="Professional">Professional</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-success" onclick="saveContact()">💾 Save Contact</button>
+        <button class="btn btn-primary" onclick="clearForm()" style="background:#718096;">✖ Clear</button>
+      </div>
+    </div>
+
+    <!-- Contact List -->
+    <div>
+      <div class="card">
+        <h2>👥 Contacts</h2>
+        <div class="contact-list" id="contactList">
+          <div class="empty-state">
+            <div class="icon">📋</div>
+            <p>Loading contacts...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API_BASE = 'http://localhost:5000/api';
+  let searchTimer = null;
+
+  function debounceSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadContacts, 300);
+  }
+
+  async function loadContacts() {
+    const search = document.getElementById('searchInput').value;
+    const type = document.getElementById('typeFilter').value;
+    let url = `${API_BASE}/contacts?`;
+    if (search) url += `search=${encodeURIComponent(search)}&`;
+    if (type) url += `type=${encodeURIComponent(type)}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) renderContacts(data.data);
+    } catch (e) {
+      showToast('Could not connect to server. Is the API running?', 'error');
+    }
+  }
+
+  function renderContacts(contacts) {
+    const list = document.getElementById('contactList');
+    const total = contacts.length;
+    const personal = contacts.filter(c => c.type === 'Personal').length;
+    const professional = contacts.filter(c => c.type === 'Professional').length;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statPersonal').textContent = personal;
+    document.getElementById('statProfessional').textContent = professional;
+
+    if (contacts.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>No contacts found.</p></div>`;
+      return;
+    }
+
+    list.innerHTML = contacts.map(c => `
+      <div class="contact-card">
+        <div class="contact-info">
+          <div class="contact-name">${escapeHtml(c.name)}
+            <span class="badge badge-${c.type.toLowerCase()}">${c.type}</span>
+          </div>
+          <div class="contact-details">
+            <span>✉️ ${escapeHtml(c.email)}</span>
+            <span>📞 ${escapeHtml(c.phone)}</span>
+          </div>
+        </div>
+        <div class="contact-actions">
+          <button class="btn btn-edit" onclick="editContact('${c._id}')">✏️ Edit</button>
+          <button class="btn btn-danger" onclick="deleteContact('${c._id}', '${escapeHtml(c.name)}')">🗑</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function saveContact() {
+    const id = document.getElementById('editId').value;
+    const payload = {
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      type: document.getElementById('type').value
+    };
+
+    if (!payload.name || !payload.email || !payload.phone) {
+      showToast('Please fill in all required fields.', 'error');
+      return;
+    }
+
+    const url = id ? `${API_BASE}/contacts/${id}` : `${API_BASE}/contacts`;
+    const method = id ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(id ? 'Contact updated!' : 'Contact added!', 'success');
+        clearForm();
+        loadContacts();
+      } else {
+        showToast(data.message || 'Error saving contact.', 'error');
+      }
+    } catch (e) {
+      showToast('Could not connect to server.', 'error');
+    }
+  }
+
+  async function editContact(id) {
+    try {
+      const res = await fetch(`${API_BASE}/contacts/${id}`);
+      const data = await res.json();
+      if (data.success) {
+        const c = data.data;
+        document.getElementById('editId').value = c._id;
+        document.getElementById('name').value = c.name;
+        document.getElementById('email').value = c.email;
+        document.getElementById('phone').value = c.phone;
+        document.getElementById('type').value = c.type;
+        document.getElementById('formTitle').textContent = '✏️ Edit Contact';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (e) {
+      showToast('Could not load contact.', 'error');
+    }
+  }
+
+  async function deleteContact(id, name) {
+    if (!confirm(`Delete contact "${name}"?`)) return;
+    try {
+      const res = await fetch(`${API_BASE}/contacts/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Contact deleted.', 'success');
+        loadContacts();
+      }
+    } catch (e) {
+      showToast('Could not delete contact.', 'error');
+    }
+  }
+
+  function clearForm() {
+    document.getElementById('editId').value = '';
+    document.getElementById('name').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('phone').value = '';
+    document.getElementById('type').value = 'Personal';
+    document.getElementById('formTitle').textContent = '➕ Add New Contact';
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  // Initial load
+  loadContacts();
+</script>
+</body>
+</html>
