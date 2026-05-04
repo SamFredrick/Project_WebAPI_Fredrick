@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const contactSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   name: {
     type: String,
     required: [true, 'Name is required'],
@@ -22,6 +27,15 @@ const contactSchema = new mongoose.Schema({
     type: String,
     enum: ['Personal', 'Professional'],
     default: 'Personal'
+  },
+  notes: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  favorite: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 

@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const Contact = require('../models/Contact');
+const { protect } = require('../middleware/auth');
 
-// GET all contacts (with optional search/filter)
-// GET /api/contacts?search=john&type=Personal
+router.use(protect);
+
 router.get('/', async (req, res) => {
   try {
-    const { search, type } = req.query;
-    let query = {};
-
+    const { search, type, favorite } = req.query;
+    let query = { user: req.user._id };
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -16,38 +16,29 @@ router.get('/', async (req, res) => {
         { phone: { $regex: search, $options: 'i' } }
       ];
     }
-
-    if (type && ['Personal', 'Professional'].includes(type)) {
-      query.type = type;
-    }
-
-    const contacts = await Contact.find(query).sort({ name: 1 });
+    if (type && ['Personal', 'Professional'].includes(type)) query.type = type;
+    if (favorite === 'true') query.favorite = true;
+    const contacts = await Contact.find(query).sort({ favorite: -1, name: 1 });
     res.json({ success: true, count: contacts.length, data: contacts });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 });
 
-// GET single contact by ID
-// GET /api/contacts/:id
 router.get('/:id', async (req, res) => {
   try {
-    const contact = await Contact.findById(req.params.id);
-    if (!contact) {
-      return res.status(404).json({ success: false, message: 'Contact not found' });
-    }
+    const contact = await Contact.findOne({ _id: req.params.id, user: req.user._id });
+    if (!contact) return res.status(404).json({ success: false, message: 'Contact not found' });
     res.json({ success: true, data: contact });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 });
 
-// POST create a new contact
-// POST /api/contacts
 router.post('/', async (req, res) => {
   try {
-    const { name, email, phone, type } = req.body;
-    const contact = await Contact.create({ name, email, phone, type });
+    const { name, email, phone, type, notes, favorite } = req.body;
+    const contact = await Contact.create({ user: req.user._id, name, email, phone, type, notes, favorite });
     res.status(201).json({ success: true, data: contact });
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -58,19 +49,15 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT update an existing contact
-// PUT /api/contacts/:id
 router.put('/:id', async (req, res) => {
   try {
-    const { name, email, phone, type } = req.body;
-    const contact = await Contact.findByIdAndUpdate(
-      req.params.id,
-      { name, email, phone, type },
+    const { name, email, phone, type, notes, favorite } = req.body;
+    const contact = await Contact.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { name, email, phone, type, notes, favorite },
       { new: true, runValidators: true }
     );
-    if (!contact) {
-      return res.status(404).json({ success: false, message: 'Contact not found' });
-    }
+    if (!contact) return res.status(404).json({ success: false, message: 'Contact not found' });
     res.json({ success: true, data: contact });
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -81,15 +68,23 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE a contact
-// DELETE /api/contacts/:id
 router.delete('/:id', async (req, res) => {
   try {
-    const contact = await Contact.findByIdAndDelete(req.params.id);
-    if (!contact) {
-      return res.status(404).json({ success: false, message: 'Contact not found' });
-    }
+    const contact = await Contact.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    if (!contact) return res.status(404).json({ success: false, message: 'Contact not found' });
     res.json({ success: true, message: 'Contact deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
+  }
+});
+
+router.patch('/:id/favorite', async (req, res) => {
+  try {
+    const contact = await Contact.findOne({ _id: req.params.id, user: req.user._id });
+    if (!contact) return res.status(404).json({ success: false, message: 'Contact not found' });
+    contact.favorite = !contact.favorite;
+    await contact.save();
+    res.json({ success: true, data: contact });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
