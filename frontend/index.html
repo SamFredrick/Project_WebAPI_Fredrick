@@ -7,235 +7,145 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; color: #2d3748; }
-
-    header {
-      background: linear-gradient(135deg, #1a365d, #2b6cb0);
-      color: white;
-      padding: 1.2rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    header h1 { font-size: 1.6rem; font-weight: 700; }
-    header span { font-size: 2rem; }
-
-    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
-
-    .controls {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .search-box {
-      flex: 1;
-      min-width: 200px;
-      padding: 0.65rem 1rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      background: white;
-      transition: border-color 0.2s;
-    }
+    #auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%); }
+    .auth-box { background: white; border-radius: 16px; padding: 2.5rem 2rem; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .auth-logo { text-align: center; margin-bottom: 1.5rem; }
+    .auth-logo h1 { font-size: 1.5rem; font-weight: 800; color: #1a365d; margin-top: 0.5rem; }
+    .auth-logo p { font-size: 0.85rem; color: #718096; margin-top: 0.2rem; }
+    .auth-tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; }
+    .auth-tab { flex: 1; padding: 0.6rem; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: #718096; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .auth-tab.active { color: #2b6cb0; border-bottom-color: #2b6cb0; }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+    .auth-group { margin-bottom: 1rem; }
+    .auth-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-bottom: 0.3rem; }
+    .auth-group input { width: 100%; padding: 0.7rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; transition: border-color 0.2s; }
+    .auth-group input:focus { outline: none; border-color: #2b6cb0; }
+    .auth-btn { width: 100%; padding: 0.75rem; background: #2b6cb0; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem; transition: background 0.2s; }
+    .auth-btn:hover { background: #1a365d; }
+    .auth-error { background: #fff5f5; border: 1px solid #fc8181; color: #c53030; padding: 0.6rem 0.9rem; border-radius: 8px; font-size: 0.88rem; margin-bottom: 1rem; display: none; }
+    #app-screen { display: none; }
+    header { background: linear-gradient(135deg, #1a365d, #2b6cb0); color: white; padding: 0.9rem 2rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .header-left { display: flex; align-items: center; gap: 0.8rem; }
+    .header-left h1 { font-size: 1.3rem; font-weight: 700; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .user-badge { background: rgba(255,255,255,0.15); padding: 0.35rem 0.9rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    .logout-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 0.35rem 0.9rem; border-radius: 20px; font-size: 0.85rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+    .logout-btn:hover { background: rgba(255,255,255,0.25); }
+    .container { max-width: 1150px; margin: 1.5rem auto; padding: 0 1.5rem; }
+    .stats { display: flex; gap: 1rem; margin-bottom: 1.2rem; }
+    .stat-box { background: white; border-radius: 10px; padding: 0.75rem 1.2rem; flex: 1; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: box-shadow 0.2s; border: 2px solid transparent; }
+    .stat-box:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+    .stat-box.active { border-color: #2b6cb0; }
+    .stat-number { font-size: 1.5rem; font-weight: 800; color: #2b6cb0; }
+    .stat-label { font-size: 0.75rem; color: #718096; font-weight: 600; text-transform: uppercase; }
+    .controls { display: flex; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+    .search-box { flex: 1; min-width: 200px; padding: 0.65rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; background: white; transition: border-color 0.2s; }
     .search-box:focus { outline: none; border-color: #2b6cb0; }
-    select.filter-select {
-      padding: 0.65rem 1rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      background: white;
-      cursor: pointer;
-    }
-    .btn {
-      padding: 0.65rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-primary { background: #2b6cb0; color: white; }
-    .btn-primary:hover { background: #1a365d; }
+    select.filter-select { padding: 0.65rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; background: white; cursor: pointer; }
+    .btn { padding: 0.65rem 1.2rem; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
     .btn-success { background: #276749; color: white; }
     .btn-success:hover { background: #1c4532; }
-    .btn-danger { background: #c53030; color: white; font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+    .btn-danger { background: #c53030; color: white; font-size: 0.82rem; padding: 0.38rem 0.75rem; }
     .btn-danger:hover { background: #9b2c2c; }
-    .btn-edit { background: #d69e2e; color: white; font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+    .btn-edit { background: #d69e2e; color: white; font-size: 0.82rem; padding: 0.38rem 0.75rem; }
     .btn-edit:hover { background: #b7791f; }
-
+    .btn-fav { background: transparent; border: 1px solid #e2e8f0; font-size: 0.82rem; padding: 0.38rem 0.75rem; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
+    .btn-fav.active { background: #fefcbf; border-color: #f6e05e; }
     .main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; }
-
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      padding: 1.5rem;
-    }
-    .card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: #1a365d; }
-
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-bottom: 0.3rem; }
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 0.6rem 0.85rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      transition: border-color 0.2s;
-    }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: #2b6cb0; }
-
-    .form-actions { display: flex; gap: 0.7rem; margin-top: 1.2rem; }
-
-    .badge {
-      display: inline-block;
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 1.4rem; }
+    .card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: #1a365d; }
+    .form-group { margin-bottom: 0.85rem; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #4a5568; margin-bottom: 0.25rem; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.55rem 0.85rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.92rem; transition: border-color 0.2s; font-family: inherit; }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #2b6cb0; }
+    .fav-check { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: #4a5568; cursor: pointer; }
+    .form-actions { display: flex; gap: 0.7rem; margin-top: 1rem; }
+    .badge { display: inline-block; padding: 0.18rem 0.55rem; border-radius: 12px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     .badge-personal { background: #bee3f8; color: #1a365d; }
     .badge-professional { background: #c6f6d5; color: #1c4532; }
-
-    .contact-list { display: flex; flex-direction: column; gap: 0.8rem; }
-    .contact-card {
-      background: white;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 1rem 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
+    .contact-list { display: flex; flex-direction: column; gap: 0.7rem; max-height: 68vh; overflow-y: auto; padding-right: 4px; }
+    .contact-card { background: white; border: 2px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
     .contact-card:hover { border-color: #2b6cb0; box-shadow: 0 2px 8px rgba(43,108,176,0.1); }
-    .contact-info { flex: 1; }
-    .contact-name { font-weight: 700; font-size: 1rem; margin-bottom: 0.2rem; }
-    .contact-details { font-size: 0.85rem; color: #718096; display: flex; gap: 1rem; margin-top: 0.3rem; flex-wrap: wrap; }
-    .contact-actions { display: flex; gap: 0.5rem; }
-
+    .contact-card.favorite { border-color: #f6e05e; background: #fffff0; }
+    .contact-top { display: flex; align-items: center; justify-content: space-between; }
+    .contact-name { font-weight: 700; font-size: 0.97rem; }
+    .contact-meta { font-size: 0.82rem; color: #718096; margin-top: 0.25rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+    .contact-notes { font-size: 0.82rem; color: #718096; margin-top: 0.3rem; font-style: italic; background: #f7fafc; padding: 0.3rem 0.5rem; border-radius: 6px; }
+    .contact-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
     .empty-state { text-align: center; padding: 3rem; color: #a0aec0; }
-    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
-
-    .toast {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      padding: 0.8rem 1.4rem;
-      border-radius: 8px;
-      color: white;
-      font-weight: 600;
-      font-size: 0.9rem;
-      z-index: 999;
-      display: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
+    .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 0.8rem 1.4rem; border-radius: 8px; color: white; font-weight: 600; font-size: 0.9rem; z-index: 999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     .toast.success { background: #276749; }
     .toast.error { background: #c53030; }
     .toast.show { display: block; animation: fadeIn 0.3s; }
-
-    .stats {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .stat-box {
-      background: white;
-      border-radius: 10px;
-      padding: 0.8rem 1.2rem;
-      flex: 1;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .stat-number { font-size: 1.6rem; font-weight: 800; color: #2b6cb0; }
-    .stat-label { font-size: 0.78rem; color: #718096; font-weight: 600; text-transform: uppercase; }
-
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    @media (max-width: 768px) {
-      .main-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 
-<header>
-  <span>📇</span>
-  <h1>Personal Contact Manager</h1>
-</header>
-
-<div class="container">
-  <!-- Stats Row -->
-  <div class="stats">
-    <div class="stat-box">
-      <div class="stat-number" id="statTotal">0</div>
-      <div class="stat-label">Total Contacts</div>
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div style="font-size:2.5rem">📇</div>
+      <h1>Contact Manager</h1>
+      <p>Your personal and professional contacts, organized.</p>
     </div>
-    <div class="stat-box">
-      <div class="stat-number" id="statPersonal">0</div>
-      <div class="stat-label">Personal</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Sign In</div>
+      <div class="auth-tab" onclick="switchTab('register')">Create Account</div>
     </div>
-    <div class="stat-box">
-      <div class="stat-number" id="statProfessional">0</div>
-      <div class="stat-label">Professional</div>
+    <div class="auth-form active" id="login-form">
+      <div class="auth-error" id="login-error"></div>
+      <div class="auth-group"><label>Email Address</label><input type="email" id="login-email" placeholder="you@email.com" /></div>
+      <div class="auth-group"><label>Password</label><input type="password" id="login-password" placeholder="Your password" onkeydown="if(event.key==='Enter')login()" /></div>
+      <button class="auth-btn" onclick="login()">Sign In</button>
+    </div>
+    <div class="auth-form" id="register-form">
+      <div class="auth-error" id="register-error"></div>
+      <div class="auth-group"><label>Full Name</label><input type="text" id="reg-name" placeholder="Jane Smith" /></div>
+      <div class="auth-group"><label>Email Address</label><input type="email" id="reg-email" placeholder="you@email.com" /></div>
+      <div class="auth-group"><label>Password <span style="color:#718096;font-weight:400">(min 6 characters)</span></label><input type="password" id="reg-password" placeholder="Create a password" onkeydown="if(event.key==='Enter')register()" /></div>
+      <button class="auth-btn" onclick="register()">Create Account</button>
     </div>
   </div>
+</div>
 
-  <!-- Search & Filter -->
-  <div class="controls">
-    <input class="search-box" type="text" id="searchInput" placeholder="🔍 Search by name, email, or phone..." oninput="debounceSearch()" />
-    <select class="filter-select" id="typeFilter" onchange="loadContacts()">
-      <option value="">All Types</option>
-      <option value="Personal">Personal</option>
-      <option value="Professional">Professional</option>
-    </select>
-  </div>
-
-  <!-- Main Grid -->
-  <div class="main-grid">
-    <!-- Form Panel -->
-    <div class="card">
-      <h2 id="formTitle">➕ Add New Contact</h2>
-      <input type="hidden" id="editId" />
-      <div class="form-group">
-        <label>Full Name *</label>
-        <input type="text" id="name" placeholder="e.g. Jane Smith" />
-      </div>
-      <div class="form-group">
-        <label>Email Address *</label>
-        <input type="email" id="email" placeholder="e.g. jane@email.com" />
-      </div>
-      <div class="form-group">
-        <label>Phone Number *</label>
-        <input type="tel" id="phone" placeholder="e.g. (303) 555-0123" />
-      </div>
-      <div class="form-group">
-        <label>Contact Type *</label>
-        <select id="type">
-          <option value="Personal">Personal</option>
-          <option value="Professional">Professional</option>
-        </select>
-      </div>
-      <div class="form-actions">
-        <button class="btn btn-success" onclick="saveContact()">💾 Save Contact</button>
-        <button class="btn btn-primary" onclick="clearForm()" style="background:#718096;">✖ Clear</button>
-      </div>
+<div id="app-screen">
+  <header>
+    <div class="header-left"><span style="font-size:1.5rem">📇</span><h1>Personal Contact Manager</h1></div>
+    <div class="header-right"><div class="user-badge" id="user-badge">Loading...</div><button class="logout-btn" onclick="logout()">Sign Out</button></div>
+  </header>
+  <div class="container">
+    <div class="stats">
+      <div class="stat-box active" onclick="filterByTab('all')" id="tab-all"><div class="stat-number" id="statTotal">0</div><div class="stat-label">Total Contacts</div></div>
+      <div class="stat-box" onclick="filterByTab('Personal')" id="tab-Personal"><div class="stat-number" id="statPersonal">0</div><div class="stat-label">Personal</div></div>
+      <div class="stat-box" onclick="filterByTab('Professional')" id="tab-Professional"><div class="stat-number" id="statProfessional">0</div><div class="stat-label">Professional</div></div>
+      <div class="stat-box" onclick="filterByTab('favorite')" id="tab-favorite"><div class="stat-number" id="statFavorite">0</div><div class="stat-label">Favorites</div></div>
     </div>
-
-    <!-- Contact List -->
-    <div>
+    <div class="controls">
+      <input class="search-box" type="text" id="searchInput" placeholder="Search by name, email, or phone..." oninput="debounceSearch()" />
+      <select class="filter-select" id="typeFilter" onchange="loadContacts()"><option value="">All Types</option><option value="Personal">Personal</option><option value="Professional">Professional</option></select>
+    </div>
+    <div class="main-grid">
       <div class="card">
-        <h2>👥 Contacts</h2>
-        <div class="contact-list" id="contactList">
-          <div class="empty-state">
-            <div class="icon">📋</div>
-            <p>Loading contacts...</p>
-          </div>
+        <h2 id="formTitle">Add New Contact</h2>
+        <input type="hidden" id="editId" />
+        <div class="form-group"><label>Full Name *</label><input type="text" id="name" placeholder="e.g. Jane Smith" /></div>
+        <div class="form-group"><label>Email Address *</label><input type="email" id="email" placeholder="e.g. jane@email.com" /></div>
+        <div class="form-group"><label>Phone Number *</label><input type="tel" id="phone" placeholder="e.g. (303) 555-0123" /></div>
+        <div class="form-group"><label>Contact Type *</label><select id="type"><option value="Personal">Personal</option><option value="Professional">Professional</option></select></div>
+        <div class="form-group"><label>Notes <span style="color:#718096;font-weight:400">(optional)</span></label><textarea id="notes" placeholder="e.g. Met at conference, follow up in June..."></textarea></div>
+        <div class="form-group"><label class="fav-check"><input type="checkbox" id="favorite" style="width:auto;padding:0;border:none;" /> Mark as Favorite</label></div>
+        <div class="form-actions">
+          <button class="btn btn-success" onclick="saveContact()">Save Contact</button>
+          <button class="btn" style="background:#718096;color:white" onclick="clearForm()">Clear</button>
         </div>
+      </div>
+      <div class="card">
+        <h2>Contacts</h2>
+        <div class="contact-list" id="contactList"><div class="empty-state"><p>Loading contacts...</p></div></div>
       </div>
     </div>
   </div>
@@ -244,155 +154,176 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const API_BASE = 'https://contact-manager-api-5hvl.onrender.com/api';
+  const API = 'https://contact-manager-api-5hvl.onrender.com/api';
+  let token = localStorage.getItem('cm_token');
+  let currentUser = JSON.parse(localStorage.getItem('cm_user') || 'null');
   let searchTimer = null;
+  let activeTab = 'all';
 
-  function debounceSearch() {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(loadContacts, 300);
+  if (token && currentUser) showApp();
+
+  function showApp() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    document.getElementById('user-badge').textContent = 'Hi, ' + currentUser.name;
+    loadContacts();
   }
 
-  async function loadContacts() {
-    const search = document.getElementById('searchInput').value;
-    const type = document.getElementById('typeFilter').value;
-    let url = `${API_BASE}/contacts?`;
-    if (search) url += `search=${encodeURIComponent(search)}&`;
-    if (type) url += `type=${encodeURIComponent(type)}`;
+  function showAuth() {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
+  }
 
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0) === (tab==='login')));
+    document.getElementById('login-form').classList.toggle('active', tab === 'login');
+    document.getElementById('register-form').classList.toggle('active', tab === 'register');
+  }
+
+  async function login() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    document.getElementById('login-error').style.display = 'none';
+    if (!email || !password) { showAuthError('login', 'Please fill in all fields.'); return; }
     try {
-      const res = await fetch(url);
+      const res = await fetch(API+'/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password}) });
       const data = await res.json();
-      if (data.success) renderContacts(data.data);
-    } catch (e) {
-      showToast('Could not connect to server. Is the API running?', 'error');
-    }
+      if (data.success) { token=data.token; currentUser=data.user; localStorage.setItem('cm_token',token); localStorage.setItem('cm_user',JSON.stringify(currentUser)); showApp(); }
+      else showAuthError('login', data.message);
+    } catch(e) { showAuthError('login','Could not connect to server.'); }
+  }
+
+  async function register() {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    document.getElementById('register-error').style.display = 'none';
+    if (!name||!email||!password) { showAuthError('register','Please fill in all fields.'); return; }
+    try {
+      const res = await fetch(API+'/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,password}) });
+      const data = await res.json();
+      if (data.success) { token=data.token; currentUser=data.user; localStorage.setItem('cm_token',token); localStorage.setItem('cm_user',JSON.stringify(currentUser)); showApp(); }
+      else showAuthError('register', data.message);
+    } catch(e) { showAuthError('register','Could not connect to server.'); }
+  }
+
+  function showAuthError(form,msg) { const el=document.getElementById(form+'-error'); el.textContent=msg; el.style.display='block'; }
+
+  function logout() { token=null; currentUser=null; localStorage.removeItem('cm_token'); localStorage.removeItem('cm_user'); showAuth(); }
+
+  function authHeaders() { return {'Content-Type':'application/json','Authorization':'Bearer '+token}; }
+
+  function filterByTab(tab) {
+    activeTab=tab;
+    document.querySelectorAll('.stat-box').forEach(b=>b.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    if (tab==='Personal'||tab==='Professional') document.getElementById('typeFilter').value=tab;
+    else document.getElementById('typeFilter').value='';
+    loadContacts();
+  }
+
+  function debounceSearch() { clearTimeout(searchTimer); searchTimer=setTimeout(loadContacts,300); }
+
+  async function loadContacts() {
+    const search=document.getElementById('searchInput').value;
+    const type=document.getElementById('typeFilter').value;
+    let url=API+'/contacts?';
+    if(search) url+=`search=${encodeURIComponent(search)}&`;
+    if(type) url+=`type=${encodeURIComponent(type)}&`;
+    if(activeTab==='favorite') url+=`favorite=true`;
+    try {
+      const res=await fetch(url,{headers:authHeaders()});
+      if(res.status===401){logout();return;}
+      const data=await res.json();
+      if(data.success) renderContacts(data.data);
+    } catch(e) { showToast('Could not connect to server.','error'); }
   }
 
   function renderContacts(contacts) {
-    const list = document.getElementById('contactList');
-    const total = contacts.length;
-    const personal = contacts.filter(c => c.type === 'Personal').length;
-    const professional = contacts.filter(c => c.type === 'Professional').length;
-
-    document.getElementById('statTotal').textContent = total;
-    document.getElementById('statPersonal').textContent = personal;
-    document.getElementById('statProfessional').textContent = professional;
-
-    if (contacts.length === 0) {
-      list.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>No contacts found.</p></div>`;
-      return;
-    }
-
-    list.innerHTML = contacts.map(c => `
-      <div class="contact-card">
-        <div class="contact-info">
-          <div class="contact-name">${escapeHtml(c.name)}
-            <span class="badge badge-${c.type.toLowerCase()}">${c.type}</span>
+    fetchAllStats();
+    const list=document.getElementById('contactList');
+    if(!contacts.length){list.innerHTML='<div class="empty-state"><p>No contacts found.</p></div>';return;}
+    list.innerHTML=contacts.map(c=>`
+      <div class="contact-card ${c.favorite?'favorite':''}">
+        <div class="contact-top">
+          <div>
+            <span class="contact-name">${esc(c.name)}</span>
+            ${c.favorite?' <span style="color:#d69e2e;font-size:0.85rem">&#9733; Favorite</span>':''}
+            <span class="badge badge-${c.type.toLowerCase()}" style="margin-left:0.4rem">${c.type}</span>
           </div>
-          <div class="contact-details">
-            <span>✉️ ${escapeHtml(c.email)}</span>
-            <span>📞 ${escapeHtml(c.phone)}</span>
+          <div class="contact-actions">
+            <button class="btn-fav ${c.favorite?'active':''}" onclick="toggleFavorite('${c._id}')" title="${c.favorite?'Remove favorite':'Add to favorites'}">&#9733;</button>
+            <button class="btn btn-edit" onclick="editContact('${c._id}')">Edit</button>
+            <button class="btn btn-danger" onclick="deleteContact('${c._id}','${esc(c.name)}')">Delete</button>
           </div>
         </div>
-        <div class="contact-actions">
-          <button class="btn btn-edit" onclick="editContact('${c._id}')">✏️ Edit</button>
-          <button class="btn btn-danger" onclick="deleteContact('${c._id}', '${escapeHtml(c.name)}')">🗑</button>
-        </div>
+        <div class="contact-meta"><span>&#9993; ${esc(c.email)}</span><span>&#9990; ${esc(c.phone)}</span></div>
+        ${c.notes?`<div class="contact-notes">${esc(c.notes)}</div>`:''}
       </div>
     `).join('');
   }
 
-  async function saveContact() {
-    const id = document.getElementById('editId').value;
-    const payload = {
-      name: document.getElementById('name').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      type: document.getElementById('type').value
-    };
-
-    if (!payload.name || !payload.email || !payload.phone) {
-      showToast('Please fill in all required fields.', 'error');
-      return;
-    }
-
-    const url = id ? `${API_BASE}/contacts/${id}` : `${API_BASE}/contacts`;
-    const method = id ? 'PUT' : 'POST';
-
+  async function fetchAllStats() {
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(id ? 'Contact updated!' : 'Contact added!', 'success');
-        clearForm();
-        loadContacts();
-      } else {
-        showToast(data.message || 'Error saving contact.', 'error');
+      const res=await fetch(API+'/contacts',{headers:authHeaders()});
+      const data=await res.json();
+      if(data.success){
+        const all=data.data;
+        document.getElementById('statTotal').textContent=all.length;
+        document.getElementById('statPersonal').textContent=all.filter(c=>c.type==='Personal').length;
+        document.getElementById('statProfessional').textContent=all.filter(c=>c.type==='Professional').length;
+        document.getElementById('statFavorite').textContent=all.filter(c=>c.favorite).length;
       }
-    } catch (e) {
-      showToast('Could not connect to server.', 'error');
-    }
+    } catch(e){}
+  }
+
+  async function saveContact() {
+    const id=document.getElementById('editId').value;
+    const payload={name:document.getElementById('name').value.trim(),email:document.getElementById('email').value.trim(),phone:document.getElementById('phone').value.trim(),type:document.getElementById('type').value,notes:document.getElementById('notes').value.trim(),favorite:document.getElementById('favorite').checked};
+    if(!payload.name||!payload.email||!payload.phone){showToast('Please fill in all required fields.','error');return;}
+    try {
+      const res=await fetch(id?API+'/contacts/'+id:API+'/contacts',{method:id?'PUT':'POST',headers:authHeaders(),body:JSON.stringify(payload)});
+      const data=await res.json();
+      if(data.success){showToast(id?'Contact updated!':'Contact added!','success');clearForm();loadContacts();}
+      else showToast(data.message||'Error saving.','error');
+    } catch(e){showToast('Could not connect.','error');}
   }
 
   async function editContact(id) {
     try {
-      const res = await fetch(`${API_BASE}/contacts/${id}`);
-      const data = await res.json();
-      if (data.success) {
-        const c = data.data;
-        document.getElementById('editId').value = c._id;
-        document.getElementById('name').value = c.name;
-        document.getElementById('email').value = c.email;
-        document.getElementById('phone').value = c.phone;
-        document.getElementById('type').value = c.type;
-        document.getElementById('formTitle').textContent = '✏️ Edit Contact';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } catch (e) {
-      showToast('Could not load contact.', 'error');
-    }
+      const res=await fetch(API+'/contacts/'+id,{headers:authHeaders()});
+      const data=await res.json();
+      if(data.success){const c=data.data;document.getElementById('editId').value=c._id;document.getElementById('name').value=c.name;document.getElementById('email').value=c.email;document.getElementById('phone').value=c.phone;document.getElementById('type').value=c.type;document.getElementById('notes').value=c.notes||'';document.getElementById('favorite').checked=c.favorite;document.getElementById('formTitle').textContent='Edit Contact';window.scrollTo({top:0,behavior:'smooth'});}
+    } catch(e){showToast('Could not load contact.','error');}
   }
 
-  async function deleteContact(id, name) {
-    if (!confirm(`Delete contact "${name}"?`)) return;
+  async function deleteContact(id,name) {
+    if(!confirm(`Delete "${name}"?`)) return;
     try {
-      const res = await fetch(`${API_BASE}/contacts/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Contact deleted.', 'success');
-        loadContacts();
-      }
-    } catch (e) {
-      showToast('Could not delete contact.', 'error');
-    }
+      const res=await fetch(API+'/contacts/'+id,{method:'DELETE',headers:authHeaders()});
+      const data=await res.json();
+      if(data.success){showToast('Contact deleted.','success');loadContacts();}
+    } catch(e){showToast('Could not delete.','error');}
+  }
+
+  async function toggleFavorite(id) {
+    try {
+      const res=await fetch(API+'/contacts/'+id+'/favorite',{method:'PATCH',headers:authHeaders()});
+      const data=await res.json();
+      if(data.success) loadContacts();
+    } catch(e){showToast('Could not update.','error');}
   }
 
   function clearForm() {
-    document.getElementById('editId').value = '';
-    document.getElementById('name').value = '';
-    document.getElementById('email').value = '';
-    document.getElementById('phone').value = '';
-    document.getElementById('type').value = 'Personal';
-    document.getElementById('formTitle').textContent = '➕ Add New Contact';
+    ['editId','name','email','phone','notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('type').value='Personal';
+    document.getElementById('favorite').checked=false;
+    document.getElementById('formTitle').textContent='Add New Contact';
   }
 
-  function showToast(msg, type) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = `toast ${type} show`;
-    setTimeout(() => t.className = 'toast', 3000);
-  }
+  function showToast(msg,type) { const t=document.getElementById('toast'); t.textContent=msg; t.className=`toast ${type} show`; setTimeout(()=>t.className='toast',3000); }
 
-  function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-  }
-
-  // Initial load
-  loadContacts();
+  function esc(str) { return String(str||'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
 </script>
 </body>
 </html>
